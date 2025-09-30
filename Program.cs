@@ -10,6 +10,8 @@ namespace Dagboksappen
         {
             DiaryManager manager = new DiaryManager();
 
+            string filePath = "C:\\Users\\Marik\\source\\repos\\Dagbok\\TextFile\\diary.txt";
+
             while (true)
             {
                 Console.WriteLine("-Dagboksapp-");
@@ -34,6 +36,10 @@ namespace Dagboksappen
                         {
                             manager.AddEntry(new DiaryEntry(date, inputText));
                             Console.WriteLine("Anteckning tillagd!");
+
+                            // Save to txt file
+                            string entry = $"{date:yyyy-MM-dd} - {inputText}{Environment.NewLine}";
+                            File.AppendAllText(filePath, entry);
                         }
                         else
                         {
@@ -42,7 +48,28 @@ namespace Dagboksappen
                         break;
 
                     case "2":
-                        manager.ListEntries();
+
+                        if (File.Exists(filePath))
+                        {
+                            string[] lines = File.ReadAllLines(filePath);
+
+                            if (lines.Length > 0)
+                            {
+                                Console.WriteLine("Alla anteckningar:");
+                                foreach (string line in lines)
+                                {
+                                    Console.WriteLine(line);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Det finns inga anteckningar än.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ingen dagboksfil hittades.");
+                        }
                         break;
 
                     case "3":

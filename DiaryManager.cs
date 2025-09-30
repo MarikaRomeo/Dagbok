@@ -1,6 +1,5 @@
 ﻿namespace Dagboksappen
 {
-    // DiaryManager class
     public class DiaryManager
     {
         private readonly List<DiaryEntry> entries = new List<DiaryEntry>();

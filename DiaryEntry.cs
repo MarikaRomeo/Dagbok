@@ -1,6 +1,5 @@
 ﻿namespace Dagboksappen
 {
-    // DiaryEntry class with constructor
     public class DiaryEntry
     {
         public DateTime Date { get; set; }
