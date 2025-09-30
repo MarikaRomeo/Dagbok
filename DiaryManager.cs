@@ -26,5 +26,10 @@
         {
             return entries.Find(e => e.Date.Date == date.Date);
         }
+
+        public List<DiaryEntry> GetEntries()
+        {
+            return entries;
+        }
     }
 }
