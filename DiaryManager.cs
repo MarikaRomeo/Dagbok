@@ -1,4 +1,7 @@
-﻿namespace Dagboksappen
+﻿using System;
+using System.Collections.Generic;
+
+namespace Dagboksappen
 {
     public class DiaryManager
     {
@@ -16,15 +19,34 @@
                 Console.WriteLine("Inga anteckningar finns.");
                 return;
             }
-            foreach (var entry in entries)
+
+            for (int i = 0; i < entries.Count; i++)
             {
-                Console.WriteLine(entry);
+                Console.WriteLine($"{i + 1}. {entries[i]}");
             }
         }
 
         public DiaryEntry? SearchByDate(DateTime date)
         {
             return entries.Find(e => e.Date.Date == date.Date);
+        }
+
+        public bool UpdateEntry(int index, string newText)
+        {
+            if (index < 0 || index >= entries.Count)
+                return false;
+
+            entries[index].Text = newText;
+            return true;
+        }
+
+        public bool RemoveEntry(int index)
+        {
+            if (index < 0 || index >= entries.Count)
+                return false;
+
+            entries.RemoveAt(index);
+            return true;
         }
 
         public List<DiaryEntry> GetEntries()

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Dagboksappen
 {
@@ -8,8 +6,9 @@ namespace Dagboksappen
     {
         static void Main(string[] args)
         {
-            DiaryManager manager = new DiaryManager();
             string filePath = "C:\\Users\\Marik\\source\\repos\\Dagbok\\TextFile\\diary.txt";
+            FileService fileService = new FileService(filePath);
+            DiaryManager manager = new DiaryManager();
 
             while (true)
             {
@@ -21,7 +20,9 @@ namespace Dagboksappen
                     Console.WriteLine("3. Sök anteckning på datum");
                     Console.WriteLine("4. Spara till fil");
                     Console.WriteLine("5. Läs från fil");
-                    Console.WriteLine("6. Avsluta");
+                    Console.WriteLine("6. Uppdatera anteckning");
+                    Console.WriteLine("7. Ta bort anteckning");
+                    Console.WriteLine("8. Avsluta");
                     Console.Write("Välj ett alternativ: ");
 
                     string? choice = Console.ReadLine();
@@ -66,56 +67,72 @@ namespace Dagboksappen
                             }
                             break;
 
-                        case "4": // save to file
+                        case "4":
                             try
                             {
-                                using (StreamWriter writer = new StreamWriter(filePath, append: false))
-                                {
-                                    foreach (var entry in manager.GetEntries())
-                                    {
-                                        writer.WriteLine($"{entry.Date:yyyy-MM-dd} - {entry.Text}");
-                                    }
-                                }
+                                fileService.SaveEntries(manager.GetEntries());
                                 Console.WriteLine("Alla anteckningar har sparats till fil!");
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                Console.WriteLine($"Fel vid sparning av fil: {ex.Message}");
+                                Console.WriteLine("Kunde inte spara till fil. Se error.log.");
                             }
                             break;
 
                         case "5":
                             try
                             {
-                                if (File.Exists(filePath))
+                                var lines = fileService.LoadEntries();
+                                if (lines.Count > 0)
                                 {
-                                    string[] lines = File.ReadAllLines(filePath);
-
-                                    if (lines.Length > 0)
+                                    Console.WriteLine("Alla anteckningar från fil:");
+                                    foreach (var line in lines)
                                     {
-                                        Console.WriteLine("Alla anteckningar från fil:");
-                                        foreach (string line in lines)
-                                        {
-                                            Console.WriteLine(line);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Filen är tom.");
+                                        Console.WriteLine(line);
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Ingen dagboksfil hittades.");
+                                    Console.WriteLine("Filen är tom eller saknas.");
                                 }
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                Console.WriteLine($"Fel vid läsning av fil: {ex.Message}");
+                                Console.WriteLine("Kunde inte läsa från fil. Se error.log.");
                             }
                             break;
 
                         case "6":
+                            manager.ListEntries();
+                            Console.Write("Vilken anteckning vill du uppdatera (ange nummer)? ");
+                            if (int.TryParse(Console.ReadLine(), out int updateIndex))
+                            {
+                                Console.Write("Ny text: ");
+                                string? newText = Console.ReadLine();
+                                if (!string.IsNullOrWhiteSpace(newText) && manager.UpdateEntry(updateIndex - 1, newText))
+                                {
+                                    Console.WriteLine("Anteckning uppdaterad!");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Misslyckades med att uppdatera anteckning.");
+                                }
+                            }
+                            break;
+
+                        case "7":
+                            manager.ListEntries();
+                            Console.Write("Vilken anteckning vill du ta bort (ange nummer)? ");
+                            if (int.TryParse(Console.ReadLine(), out int removeIndex))
+                            {
+                                if (manager.RemoveEntry(removeIndex - 1))
+                                    Console.WriteLine("Anteckning borttagen!");
+                                else
+                                    Console.WriteLine("Misslyckades med att ta bort anteckning.");
+                            }
+                            break;
+
+                        case "8":
                             return;
 
                         default:
@@ -127,7 +144,8 @@ namespace Dagboksappen
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ett oväntat fel inträffade: {ex.Message}");
+                    fileService.LogError($"Ov. fel: {ex.Message}");
+                    Console.WriteLine("Ett oväntat fel inträffade. Se error.log för detaljer.");
                 }
             }
         }
